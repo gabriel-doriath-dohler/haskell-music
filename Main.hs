@@ -8,17 +8,60 @@ import Text.Printf
 import Data.List
 
 type Pulse = Float
+type Wave = [Pulse]
 type Seconds = Float
 type Samples = Float
 type Hz = Float
 type Semitones = Float
 type Beats = Float
+type Volume = Float
+type Octave = Float
+
+data Note
+    = Do
+    | DoSharp
+    | Re
+    | ReSharp
+    | Mi
+    | Fa
+    | FaSharp
+    | Sol
+    | SolSharp
+    | La
+    | LaSharp
+    | Si
+    deriving (Show, Eq)
+
+type NoteParameters = (Octave, Volume)
+type NoteWithHarmonics = [(Note, NoteParameters)]
+type Chord = (Beats, [NoteWithHarmonics], Volume)
+type Melody = [Chord]
+
+-- Melodies
+takeFive :: Melody
+takeFive = [ (0.5, [[(Sol, (0, 1.0))]], 1.0)
+           , (0.5, [[(Do, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(ReSharp, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(Sol, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
+           , (1.0, [[(ReSharp, (1.0, 1.0))]], 1.0)
+           , (0.5, [[(Sol, (0, 1.0))]], 1.0)
+           , (0.25, [[(SolSharp, (0, 1.0))]], 1.0)
+           , (0.25, [[(La, (0, 1.0))]], 1.0)
+           , (1.0, [[(LaSharp, (0, 1.0))]], 1.0)
+           , (3.0, [[(Do, (1.0, 1.0))]], 1.0)
+           ]
+
+-- Parameters
 
 outputFilePath :: FilePath
 outputFilePath = "output.bin"
 
-volume :: Float
-volume = 0.2
+masterVolume :: Float
+masterVolume = 1.0
 
 sampleRate :: Samples
 sampleRate = 48000.0
@@ -32,86 +75,72 @@ bpm = 120.0
 beatDuration :: Seconds
 beatDuration = 60.0 / bpm
 
+-- Generate a wave
+
+melody :: Melody -> Wave
+melody = concat . map chord
+
+chord :: Chord -> Wave
+chord (beats, notes, vol) =
+    map (* vol) . superpose $ map (noteWithHarmonics beats) notes
+
+noteWithHarmonics :: Beats -> NoteWithHarmonics -> Wave
+noteWithHarmonics beats = superpose . map (note beats)
+
+note :: Beats -> (Note, NoteParameters) -> Wave
+note beats (noteName, (nb, vol)) =
+       map (* vol) $ freq frequency (beats * beatDuration)
+    where
+        n = noteNumber noteName + 12.0 * nb
+        frequency = f n
+
+freq :: Hz -> Seconds -> Wave
+freq hz duration =
+    map (* masterVolume) $ zipWith3 (\x y z -> x * y * z) release attack output
+    where
+        step = (hz * 2 * pi) / sampleRate
+
+        attack :: Wave
+        attack = map (min 1.0) [0.0,0.001 ..]
+
+        release :: Wave
+        release = reverse $ take (length output) attack
+
+        output :: Wave
+        output = map sin $ map (* step) [0.0 .. sampleRate * duration]
+
+noteNumber :: Note -> Float
+noteNumber La       = 0.0
+noteNumber LaSharp  = 1.0
+noteNumber Si       = 2.0
+noteNumber Do       = -9.0
+noteNumber DoSharp  = -8.0
+noteNumber Re       = -7.0
+noteNumber ReSharp  = -6.0
+noteNumber Mi       = -5.0
+noteNumber Fa       = -4.0
+noteNumber FaSharp  = -3.0
+noteNumber Sol      = -2.0
+noteNumber SolSharp = -1.0
+
+superpose :: [Wave] -> Wave
+superpose = map sum . transpose
+
 -- NOTE: the formula is taken from https://pages.mtu.edu/~suits/NoteFreqCalcs.html
 f :: Semitones -> Hz
 f n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
 
-note :: Semitones -> Beats -> [Pulse]
-note n beats = freq (f n) (beats * beatDuration)
+-- Save and play
 
-freq :: Hz -> Seconds -> [Pulse]
-freq hz duration =
-  map (* volume) $ zipWith3 (\x y z -> x * y * z) release attack output
-  where
-    step = (hz * 2 * pi) / sampleRate
+save :: FilePath -> Wave -> IO ()
+save filePath wave = B.writeFile filePath $ B.toLazyByteString $ fold $ map B.floatLE wave
 
-    attack :: [Pulse]
-    attack = map (min 1.0) [0.0,0.001 ..]
-
-    release :: [Pulse]
-    release = reverse $ take (length output) attack
-
-    output :: [Pulse]
-    output = map sin $ map (* step) [0.0 .. sampleRate * duration]
-
-wave :: [Pulse]
-wave =
-  concat
-    [ note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.5
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.5
-    , note 5 0.25
-    , note 5 0.25
-    , note 5 0.25
-    , note 5 0.25
-    , note 5 0.25
-    , note 5 0.25
-    , note 5 0.5
-    , note 3 0.25
-    , note 3 0.25
-    , note 3 0.25
-    , note 3 0.25
-    , note 3 0.25
-    , note 3 0.25
-    , note 3 0.5
-    , note (-2) 0.5
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.25
-    , note 0 0.5
-    ]
-
-hehehe :: [Pulse]
-hehehe = concat [ note 0 0.25
-                , note 0 0.25
-                , note 12 0.5
-                , note 7 (0.5 + 0.25)
-                , note 6 0.5
-                , note 5 0.5
-                , note 3 0.5
-                , note 0 0.25
-                , note 3 0.25
-                , note 5 0.25
-                ]
-
-save :: FilePath -> IO ()
-save filePath = B.writeFile filePath $ B.toLazyByteString $ fold $ map B.floatLE hehehe
-
-play :: IO ()
-play = do
-  save outputFilePath
-  _ <- runCommand $ printf "ffplay -autoexit -showmode 1 -f f32le -ar %f %s" sampleRate outputFilePath
-  return ()
+play :: Wave -> IO ()
+play wave = do
+    save outputFilePath wave
+    _ <- runCommand $ printf "ffplay -autoexit -showmode 1 -f f32le -ar %f %s" sampleRate outputFilePath
+    return ()
 
 main :: IO ()
-main = save outputFilePath
+main = save outputFilePath (melody takeFive)
+
