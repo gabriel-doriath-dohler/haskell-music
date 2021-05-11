@@ -17,7 +17,7 @@ type Beats = Float
 type Volume = Float
 type Octave = Float
 
-data Note
+data NoteName
     = Do
     | DoSharp
     | Re
@@ -32,159 +32,197 @@ data Note
     | Si
     deriving (Show, Eq)
 
-type NoteParameters = (Octave, Volume)
-type NoteWithHarmonics = [(Note, NoteParameters)]
-type Chord = (Beats, [NoteWithHarmonics], Volume)
-type Melody = [Chord]
+data Note = Note
+    { getName :: NoteName
+    , getOctave :: Octave
+    , getBeats :: Beats
+    , getVolume :: Volume
+    }
 
--- Melodies
-takeFive :: Melody
-takeFive = [ (0.5, [[(Sol, (0, 1.0))]], 1.0)
-           , (0.5, [[(Do, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (1.0, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Sol, (0, 1.0))]], 1.0)
-           , (0.25, [[(SolSharp, (0, 1.0))]], 1.0)
-           , (0.25, [[(La, (0, 1.0))]], 1.0)
-           , (1.0, [[(LaSharp, (0, 1.0))]], 1.0) -- 14
-           , (3.0, [[(Do, (1.0, 1.0))]], 1.0)
+instance Show Note where
+    show (Note name octave beats volume) =
+        printf "%f,%f" frequency (beats * beatDuration)
+        where
+            n = noteNumber name + 12.0 * octave
+            frequency = f n
 
-           , (0.25, [[(Re, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Re, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (1.0, 1.0))]], 1.0)
-           , (1.0, [[(LaSharp, (0.0, 1.0))]], 1.0) -- 15
-           , (3.0, [[(Do, (1.0, 1.0))]], 1.0)
+type Melody = [Note]
 
-           , (0.25, [[(LaSharp, (0.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(LaSharp, (0.0, 1.0))]], 1.0)
-           , (0.25, [[(Sol, (0.0, 1.0))]], 1.0)
-           , (1.0, [[(Fa, (0.0, 1.0))]], 1.0) -- 16
-           , (3.0, [[(Sol, (0.0, 1.0))]], 1.0)
+type MelodyWithTime = [(Note, Float)]
+
+showMelody m = unlines $ map show $ zip m $ scanl
+    (\t -> (\note -> t + beatDuration * getBeats note)) 0 m
+
+-- Melodies.
+dosi :: Melody
+dosi =
+    [ Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 1 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Si 0 0.5 1
+    , Note Do 0 0.5 1
+    ]
+
+lafasolla :: Melody
+lafasolla =
+    [ Note La 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note FaSharp 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Sol 0 0.5 1
+    , Note La 0 0.5 1
+    ]
+
+lafa :: Melody
+lafa =
+    [ Note La 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note FaSharp 0 2.5 1
+    ]
+
+fami :: Melody
+fami =
+    [ Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 1 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Mi 1 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    ]
+
+theme3 :: Melody
+theme3 = dosi ++ lafasolla ++ dosi
+
+theme4 :: Melody
+theme4 = theme3 ++ lafa
+
+themeFa3 :: Melody
+themeFa3 = fami ++
+    [ Note Re 1 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Do 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Do 1 0.5 1
+    , Note Re 1 0.5 1
+    ] ++ fami
+
+themeFa4 :: Melody
+themeFa4 = themeFa3 ++
+    [ Note Re 1 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Do 0 2.5 1
+    ]
+
+themeLa4 :: Melody
+themeLa4 =
+    [ Note LaSharp 0 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note LaSharp 1 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note Sol 1 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note LaSharp 0 0.5 1
+
+    , Note Fa 1 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note Mi 1 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note LaSharp 0 0.5 1
+    , Note Fa 1 0.5 1
+    , Note Fa 1 0.5 1
+
+    , Note Sol 0 0.5 1
+    , Note Sol 0 0.5 1
+    , Note Sol 1 0.5 1
+    , Note Sol 0 0.5 1
+    , Note Sol 0 0.5 1
+    , Note Fa 1 0.5 1
+    , Note Sol 0 0.5 1
+    , Note Sol 0 0.5 1
+
+    , Note Mi 1 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Fa 0 0.5 1
+    , Note Re 1 2.5 1
+    ]
+
+triolets1 :: Melody
+triolets1 =
+    [ Note ReSharp 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    ]
+
+triolets2 :: Melody
+triolets2 = []
+
+triolets3 :: Melody
+triolets3 = []
+
+triolets4 :: Melody
+triolets4 = []
+
+triolets5 :: Melody
+triolets5 = []
+
+triolets6 :: Melody
+triolets6 = []
+
+triolets7 :: Melody
+triolets7 = []
+
+triolets8 :: Melody
+triolets8 = []
 
 
-           , (0.5, [[(Sol, (0, 1.0))]], 1.0)
-           , (0.5, [[(Do, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (1.0, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.5, [[(Sol, (0, 1.0))]], 1.0)
-           , (0.25, [[(SolSharp, (0, 1.0))]], 1.0)
-           , (0.25, [[(La, (0, 1.0))]], 1.0)
-           , (1.0, [[(LaSharp, (0, 1.0))]], 1.0) -- 18
-           , (3.0, [[(Do, (1.0, 1.0))]], 1.0)
+repeatW :: Int -> [a] -> [a]
+repeatW n = take n . cycle
 
-           , (0.25, [[(LaSharp, (0.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(LaSharp, (0.0, 1.0))]], 1.0)
-           , (0.25, [[(Sol, (0.0, 1.0))]], 1.0)
-           , (1.0, [[(Fa, (0.0, 1.0))]], 1.0) -- 19
-           , (3.0, [[(Sol, (0.0, 1.0))]], 1.0)
-
-           , (0.25, [[(Re, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(ReSharp, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Re, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (1.0, 1.0))]], 1.0)
-           , (1.0, [[(LaSharp, (0.0, 1.0))]], 1.0) -- 20
-           , (3.0, [[(Do, (1.0, 1.0))]], 1.0)
-
-           , (2.0, [[(Do, (1.0, 0.0))]], 0.0)
-
-
-           , (0.5, [[(Do, (2.0, 1.0))]], 0.7) -- 21
-           , (0.75, [[(ReSharp, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(ReSharp, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(Do, (2.0, 1.0))]], 0.7)
-           , (0.75, [[(SolSharp, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(SolSharp, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(La, (1.0, 1.0))]], 0.7)
-
-           -- 22
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Re, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(Re, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Sol, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Sol, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(ReSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 0.7)
-
-           -- 23
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Do, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Fa, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(Re, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(ReSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 0.7)
-
-           -- 24
-           , (0.5, [[(Sol, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (1.0, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(La, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Si, (1.0, 1.0))]], 0.7)
-
-           -- 25
-           , (2.0, [[(Do, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(Do, (2.0, 1.0))]], 0.7)
-           , (0.75, [[(ReSharp, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(ReSharp, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(Do, (2.0, 1.0))]], 0.7)
-           , (0.75, [[(SolSharp, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(SolSharp, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Sol, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Sol, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(La, (1.0, 1.0))]], 0.7)
-
-           -- 26
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Re, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(Re, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Sol, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Sol, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(ReSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(FaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Sol, (1.0, 1.0))]], 0.7)
-
-           -- 27
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Do, (2.0, 1.0))]], 1.0)
-           , (0.25, [[(Do, (2.0, 0.0))]], 0.0)
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (0.75, [[(Fa, (1.0, 1.0))]], 1.0)
-           , (0.25, [[(Fa, (1.0, 0.0))]], 0.0)
-           , (0.5, [[(Re, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(Fa, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(LaSharp, (1.0, 1.0))]], 0.7)
-           , (0.5, [[(SolSharp, (1.0, 1.0))]], 0.7)
-           , (3.0, [[(Sol, (1.0, 1.0))]], 0.7) -- 28
-           ]
+doom :: Melody
+doom = map (translate (-5 - 12)) $
+    repeatW 3 theme4 ++
+    theme3 ++ triolets1 ++
+    theme4 ++
+    theme3 ++ triolets2 ++
+    themeFa4 ++
+    themeFa3 ++ triolets3 ++
+    repeatW 2 theme4 ++
+    themeLa4 ++
+    theme3 ++ triolets4 ++
+    theme4 ++
+    theme3 ++ triolets5 ++
+    theme4 ++
+    theme3 ++ triolets6 ++
+    themeFa4 ++
+    themeFa3 ++ triolets7 ++
+    repeatW 2 theme4 ++
+    themeLa4 ++
+    theme3 ++ triolets8
+    where
+        translate n (Note name octave beats volume) =
+            Note name (octave + n / 12) beats volume -- Ugly trick.
 
 -- Parameters
 
@@ -201,28 +239,24 @@ pitchStandard :: Hz
 pitchStandard = 440.0
 
 bpm :: Beats
-bpm = 120.0
+bpm = 255.0
 
 beatDuration :: Seconds
 beatDuration = 60.0 / bpm
 
 -- Generate a wave
 
-melody :: Melody -> Wave
-melody = concat . map chord
+doomWave :: Wave
+doomWave = waveFromMelody doom
 
-chord :: Chord -> Wave
-chord (beats, notes, vol) =
-    map (* vol) . superpose $ map (noteWithHarmonics beats) notes
+waveFromMelody :: Melody -> Wave
+waveFromMelody = concat . map waveFromNote
 
-noteWithHarmonics :: Beats -> NoteWithHarmonics -> Wave
-noteWithHarmonics beats = superpose . map (note beats)
-
-note :: Beats -> (Note, NoteParameters) -> Wave
-note beats (noteName, (nb, vol)) =
-       map (* vol) $ freq frequency (beats * beatDuration)
+waveFromNote :: Note -> Wave
+waveFromNote (Note name octave beats volume) =
+       map (* volume) $ freq frequency (beats * beatDuration)
     where
-        n = noteNumber noteName + 12.0 * nb
+        n = noteNumber name + 12.0 * octave
         frequency = f n
 
 freq :: Hz -> Seconds -> Wave
@@ -240,7 +274,7 @@ freq hz duration =
         output :: Wave
         output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
-noteNumber :: Note -> Float
+noteNumber :: NoteName -> Float
 noteNumber La       = 0.0
 noteNumber LaSharp  = 1.0
 noteNumber Si       = 2.0
@@ -254,9 +288,6 @@ noteNumber FaSharp  = -3.0
 noteNumber Sol      = -2.0
 noteNumber SolSharp = -1.0
 
-superpose :: [Wave] -> Wave
-superpose = map sum . transpose
-
 -- NOTE: the formula is taken from https://pages.mtu.edu/~suits/NoteFreqCalcs.html
 f :: Semitones -> Hz
 f n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
@@ -266,6 +297,9 @@ f n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
 save :: FilePath -> Wave -> IO ()
 save filePath wave = B.writeFile filePath $ B.toLazyByteString $ fold $ map B.floatLE wave
 
+playDoom :: IO ()
+playDoom = play doomWave
+
 play :: Wave -> IO ()
 play wave = do
     save outputFilePath wave
@@ -273,5 +307,5 @@ play wave = do
     return ()
 
 main :: IO ()
-main = save outputFilePath (melody takeFive)
+main = putStrLn $ showMelody doom
 
