@@ -4,6 +4,7 @@
 
 ## Interactive Mode
 `ghci`
+`:l Main.hs`
 `playDoom`
 
 ## Dependencies
