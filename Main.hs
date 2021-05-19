@@ -61,8 +61,8 @@ dosi =
     , Note Do 1 0.5 1
     , Note Do 0 0.5 1
     , Note Do 0 0.5 1
-    , Note Do 0 0.5 1
     , Note Si 0 0.5 1
+    , Note Do 0 0.5 1
     , Note Do 0 0.5 1
     ]
 
@@ -176,26 +176,116 @@ triolets1 =
     ]
 
 triolets2 :: Melody
-triolets2 = []
+triolets2 =
+    [ Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Do 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Mi 2 (1/3) 1
+    , Note Sol 2 (1/3) 1
+    ]
 
 triolets3 :: Melody
-triolets3 = []
+triolets3 =
+    [ Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note La 1 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    ]
 
 triolets4 :: Melody
-triolets4 = []
+triolets4 =
+    [ Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Do 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 2 (1/3) 1
+    ]
 
 triolets5 :: Melody
-triolets5 = []
+triolets5 =
+    [ Note ReSharp 1 (1/3) 1
+    , Note Do 1 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    ]
 
 triolets6 :: Melody
-triolets6 = []
+triolets6 =
+    [ Note Do 2 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Mi 2 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Si 1 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 2 (1/3) 1
+    , Note Do 2 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    ]
 
 triolets7 :: Melody
-triolets7 = []
+triolets7 =
+    [ Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    , Note La 1 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Fa 1 (1/3) 1
+    , Note Re 1 (1/3) 1
+    , Note Si 0 (1/3) 1
+    ]
 
 triolets8 :: Melody
-triolets8 = []
-
+triolets8 =
+    [ Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Do 1 (1/3) 1
+    , Note Sol 0 (1/3) 1
+    , Note Do 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Si 2 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Sol 1 (1/3) 1
+    , Note Mi 1 (1/3) 1
+    , Note Do 1 (1/3) 1
+    ]
 
 repeatW :: Int -> [a] -> [a]
 repeatW n = take n . cycle
